@@ -161,6 +161,8 @@ public class Player : MonoBehaviour
                 speedEffect.SetActive(true);
                 moveSpeed *= boostSpeed;
                 StartCoroutine(IEWaitBoost());
+
+                Destroy(collision.gameObject);
             }
         }
         if (collision.name.Contains("MetalTrap"))
