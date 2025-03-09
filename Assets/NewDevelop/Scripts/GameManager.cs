@@ -24,6 +24,26 @@ public class GameManager : MonoBehaviour
 
     public Text countdownText;
 
+    [Header("Hp")]
+
+    public Slider sliderHp;
+
+    public TextMeshProUGUI txtHp;
+
+    public float hpDecreaseRate = 100;
+
+    public const float MAX_HP = 1000;
+
+    [Header("WinGameState")]
+
+    public GameObject winGO;
+
+    private float currentHp;
+
+    [Header("Audio")]
+
+    public AudioSource audioSource;
+
     public static GameManager Instance { get; private set; }
 
     private void Awake()
@@ -48,7 +68,7 @@ public class GameManager : MonoBehaviour
         chunkSpawner.IsUpdateChunk = false;
 
         tmp.text = "Choose Character 1";
-
+        currentHp = MAX_HP;
     }
 
     private int countChoose;  
@@ -126,6 +146,62 @@ public class GameManager : MonoBehaviour
 
         yield return new WaitForSecondsRealtime(2f);
         SceneManager.LoadScene("Map2Player");
+    }
+
+    public void TriggerOstacle()
+    {
+        currentHp -= hpDecreaseRate;
+
+        if(currentHp <= 0)
+        {
+            currentHp = 0;
+            RestartGame();
+        }
+
+        txtHp.text = currentHp.ToString();
+
+        sliderHp.value = currentHp / MAX_HP;
+    }
+
+    private int itemRewardCount;
+
+    public int WIN_REWARD_COUNT = 10;
+
+    public void RewardItem()
+    {
+        itemRewardCount++;
+        
+        if(itemRewardCount >= WIN_REWARD_COUNT)
+        {
+            WinGameState();
+        }
+    }
+
+    private bool isWinState = false;
+    public void WinGameState()
+    {
+        if (isWinState)
+        {
+            isWinState = true;
+            return;
+        }
+
+        player1.IsGameStarted = false;
+        player2.IsGameStarted = false;
+        chunkSpawner.IsUpdateChunk = false;
+
+        winGO.SetActive(true);
+
+        GameObject pfx = Resources.Load<GameObject>("Effect/EffectCookieJar");
+        Instantiate(pfx).transform.position = Camera.main.transform.position;
+
+        player1.Stop();
+        player2.Stop();
+    }
+
+    public void PlayAudio(AudioClip audio)
+    {
+        audioSource?.PlayOneShot(audio);
     }
 }
 

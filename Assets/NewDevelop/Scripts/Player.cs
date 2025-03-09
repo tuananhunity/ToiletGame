@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -27,6 +28,9 @@ public class Player : MonoBehaviour
     public SpriteRenderer spriteCharacter;
     public Animator animator;
     public float boostSpeed = 3;
+
+    public AudioClip audioFart;
+    public AudioSource audioSource;
 
     private float originalSpeed;
 
@@ -98,6 +102,8 @@ public class Player : MonoBehaviour
             Invoke("HideFartEffect", 0.5f);
         }
 
+        audioSource.clip = audioFart;
+        audioSource.Play();
     }
 
 
@@ -144,6 +150,9 @@ public class Player : MonoBehaviour
     private bool isBoosting;
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        if (!IsGameStarted) 
+            return;
+
         if (collision.name.Contains("PaperToilet"))
         {
             if (!isBoosting)
@@ -154,6 +163,21 @@ public class Player : MonoBehaviour
                 StartCoroutine(IEWaitBoost());
             }
         }
+        if (collision.name.Contains("MetalTrap"))
+        {
+            GameManager.Instance.TriggerOstacle();
+        }
+        if (collision.name.Contains("RewardItem"))
+        {
+            GameManager.Instance.RewardItem();
+            Destroy(collision.gameObject);
+        }
+    }
+
+    public void Stop()
+    {
+        rb.velocity = Vector2.zero;
+        rb.gravityScale = 0;
     }
 
     private IEnumerator IEWaitBoost()
